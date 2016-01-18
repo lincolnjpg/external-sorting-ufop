@@ -2,11 +2,12 @@
 
 typedef struct
 {
-  short size;
+  //os campos start e end são usados apenas pelo método quicksort externo
+  short size, start, end;
   tStudent *student;
 } tRAM;
 
-void createRAM(tRAM *);
+void createRAM(tRAM *, short size);
 void insertRAM(tRAM *, tStudent, short);
 short getSize(tRAM *);
 void cleanRAM(tRAM *);

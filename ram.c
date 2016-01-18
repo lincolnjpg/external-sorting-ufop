@@ -2,7 +2,7 @@
 
 #include "ram.h"
 
-void createRAM(tRAM *RAM)
+void createRAM(tRAM *RAM, short size)
 {
   RAM->size = 0;
   RAM->student = (tStudent *) malloc(sizeof(tStudent) * RAM_SIZE);

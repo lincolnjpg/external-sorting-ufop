@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "balancedHeap.h"
+#include "externalQuicksort.h"
 
 void balancedMerge()
 {  
@@ -38,7 +38,7 @@ void balancedMerge()
     createTape(&(tapeSet[posIn].tape[i]), i);
 
   //create and initialize RAM
-  createRAM(&RAM);
+  createRAM(&RAM, RAM_SIZE);
 
   //debugar aqui (gerou errado para N = 10...)
   numBlocks = sortedBlocksHeap(&file, tapeSet, &RAM, N);
