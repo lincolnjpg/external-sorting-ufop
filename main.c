@@ -7,8 +7,11 @@ void createNewFile(short);
 
 int main(void)
 {
-  balancedMerge();
+
+  printf("%d\n", FOPEN_MAX);
+  //balancedMerge();
   externalQuickSort();
+
 
   return 0;
 }

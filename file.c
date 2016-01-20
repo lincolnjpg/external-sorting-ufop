@@ -8,6 +8,7 @@ short loadFromFile(FILE **file, tStudent *student)
 {
   char str[86], *newString;
   short stateBeg, cityBeg, cityEnd, courseBeg, courseEnd;
+  int test;
 
   stateBeg = 0;
   cityBeg = 3;
@@ -15,9 +16,12 @@ short loadFromFile(FILE **file, tStudent *student)
   courseBeg = 54;
   courseEnd = courseBeg + 29;
 
-  //file's lines have 100 characters at most (plus new-line)
+  test = ftell(*file);
 
-  if (fscanf(*file, "%d %f ", &(student->id), &(student->grade)) == 2)
+  //file's lines have 100 characters at most (plus new-line)
+  test = fscanf(*file, "%d %f ", &(student->id), &(student->grade));
+
+  if (test == 2)
   {
     //pergunto se é igual a dois pq fscanf retorna a quantidade de "variáveis" lidas
     fgets(str, 86, *file);

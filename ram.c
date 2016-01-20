@@ -5,7 +5,8 @@
 void createRAM(tRAM *RAM, short size)
 {
   RAM->size = 0;
-  RAM->student = (tStudent *) malloc(sizeof(tStudent) * RAM_SIZE);
+  //RAM->student = (tStudent *) malloc(sizeof(tStudent) * RAM_SIZE);
+  RAM->student = (tStudent *) malloc(sizeof(tStudent) * size);
 }
 
 void insertRAM(tRAM *RAM, tStudent student, short pos)
@@ -22,6 +23,8 @@ short getSize(tRAM *RAM)
 void cleanRAM(tRAM *RAM)
 {
   RAM->size = 0;
+  RAM->start = 0;
+  RAM->end = 0;
 }
 
 tStudent getStudent(tRAM *RAM, short pos)
