@@ -46,8 +46,8 @@ void insertionSort(tRAM *RAM)
     aux = RAM->student[i];
     j = i;
 
-    //por enquanto, crescente
-    while (aux.grade < RAM->student[j - 1].grade && j > 0)
+    //decrescente
+    while (aux.grade > RAM->student[j - 1].grade && j > 0)
     {
       RAM->student[j] = RAM->student[j - 1];
       j--;
@@ -149,7 +149,7 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
                   RAM->student[0].city,
                   RAM->student[0].course);
 
-          inferiorLimit = RAM->student[0].grade;
+          superiorLimit = RAM->student[0].grade;
           (p1->size)++;
           RAM->start = 1;
           RAM->end = RAM_SIZE_QS;
@@ -168,7 +168,7 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
           //sizeof(tStudent)
           fseek(p2_Write, 100 * -2, 1);
 
-          superiorLimit = RAM->student[RAM_SIZE_QS - 1].grade;
+          inferiorLimit = RAM->student[RAM_SIZE_QS - 1].grade;
           (p2->size)++;
           RAM->start = 0;
           RAM->end = RAM_SIZE_QS - 1;
@@ -177,7 +177,7 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
 
         (RAM->size)--;       
       }
-      else if (auxItem.grade <= inferiorLimit)
+      else if (auxItem.grade >= superiorLimit)
       {
         //fwrite(&auxItem, sizeof(tStudent), 1, p1_Write);
         fprintf(p1_Write, "%08d %05.1f %s %-50s %-30s\n",
