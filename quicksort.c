@@ -5,16 +5,15 @@
 #include <sys/time.h>
 #include <math.h>
 
-#include "externalQuicksort.h"
+#include "constants.h"
+#include "file.h"
+#include "quicksort.h"
 
-void externalQuickSort(void)
+void externalQuickSort(int N)
 {
-  short RAM_SIZE_QS;
-  int sorted, grade;
-  tStudent aux;
+  short RAM_SIZE_QS;  
   tPartition p1, p2;
-  tRAM RAM;
-  FILE *f;
+  tRAM RAM;  
   struct timeval t, t2;
   double tTotal;
 
@@ -79,10 +78,10 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
   estudante, tb há um \n*/
 
   //sizeof(tStudent)
-  fseek(p1_Read, p1_R * 100, 0);
-  fseek(p1_Write, p1_W * 100, 0);
-  fseek(p2_Read, p2_R * 100, 0);
-  fseek(p2_Write, p2_W * 100, 0);
+  fseek(p1_Read, p1_R * LINE_SIZE, 0);
+  fseek(p1_Write, p1_W * LINE_SIZE, 0);
+  fseek(p2_Read, p2_R * LINE_SIZE, 0);
+  fseek(p2_Write, p2_W * LINE_SIZE, 0);
 
   inferiorLimit = FLT_MIN;
   superiorLimit = FLT_MAX;
@@ -114,7 +113,7 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
       loadFromFile(&p2_Read, &auxItem);
       //fseek(p2_Read, sizeof(tStudent) * -2, 1);
       //sizeof(tStudent)
-      fseek(p2_Read, 100 * -2, 1);
+      fseek(p2_Read, LINE_SIZE * -2, 1);
       p2_NextRead = ftell(p2_Read);
 
       nextRead = 1;
@@ -166,7 +165,7 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
                   RAM->student[RAM_SIZE_QS - 1].course);
           //fseek(p2_Write, sizeof(tStudent) * -2, 1);
           //sizeof(tStudent)
-          fseek(p2_Write, 100 * -2, 1);
+          fseek(p2_Write, LINE_SIZE * -2, 1);
 
           inferiorLimit = RAM->student[RAM_SIZE_QS - 1].grade;
           (p2->size)++;
@@ -193,7 +192,7 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
                 auxItem.city, auxItem.course);
         //fseek(p2_Write, sizeof(tStudent) * -2, 1);
         //sizeof(tStudent)
-        fseek(p2_Write, 100 * -2, 1);
+        fseek(p2_Write, LINE_SIZE * -2, 1);
         (p2->size)++;
       }
 
@@ -215,7 +214,7 @@ void quickSort(int p1_R, int p2_R, int p1_W, int p2_W,
   //p1->delimiter = ftell(p1_Write) / sizeof(tStudent) - 1;
   //p2->delimiter = p1->delimiter + RAM->size + 1;
   //sizeof(tStudent)
-  p1->delimiter = ftell(p1_Write) / 100 - 1;
+  p1->delimiter = ftell(p1_Write) / LINE_SIZE - 1;
   p2->delimiter = p1->delimiter + RAM->size + 1;
 
   insertionSort(&(*RAM));

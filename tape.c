@@ -3,8 +3,14 @@
 #include <string.h>
 
 #include "tape.h"
+#include "file.h"
 
-void createTape(tTape *tape, short id)
+void createTape(tTape **tape, short num)
+{
+  *tape = (tTape *) malloc(sizeof(tTape) * num);
+}
+
+void initializeTape(tTape *tape, short id)
 {
   char auxId[3]; //number as c-string
 

@@ -4,87 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "externalQuicksort.h"
+#include "balanced_multiway_merge.h"
+#include "constants.h"
+#include "file.h"
 
-void balancedMerge()
-{  
-  short posIn, posOut, posCtrl, idxIn, idxOut, idxCtrl, lastMerge;
-  int i, blockSize, numBlocks, numGroups;
-  tTapeSet tapeSet[2], *ptrIn, *ptrOut;
-  tRAM RAM;
-  FILE *file;
-
-  //open main input file
-  file = fopen("PROVAO.txt", "r");
-
-  //this variable will control swaps between in/out tapes
-  posIn = idxIn = 0;
-  posOut = posCtrl = 1;
-  idxOut = idxCtrl = TAPE_SET_SIZE;
-
-  //controlling the loops
-  blockSize = RAM_SIZE;
-
-  numBlocks = N / RAM_SIZE;
-
-  if (N % RAM_SIZE > 0)
-    numBlocks++;
-
-  //create and initialize tapes
-  tapeSet[posIn].tape = (tTape *) malloc(sizeof(tTape) * TAPE_SET_SIZE);
-  tapeSet[posOut].tape = (tTape *) malloc(sizeof(tTape) * TAPE_SET_SIZE);
-
-  for (i = 0; i < TAPE_SET_SIZE; i++)
-    createTape(&(tapeSet[posIn].tape[i]), i);
-
-  //create and initialize RAM
-  createRAM(&RAM, RAM_SIZE);
-
-  //debugar aqui (gerou errado para N = 10...)
-  numBlocks = sortedBlocksHeap(&file, tapeSet, &RAM, N);
-  //retornoTeste = sortedBlocks(&file, tapeSet, &RAM, N);
-
-  for (i = 0; i < TAPE_SET_SIZE; i++)
-    closeTape(&(tapeSet[posIn].tape[i]));
-
-  fclose(file);    
-
-  while (numBlocks > 1)
-  {
-    //set pointers to tape sets
-    ptrIn = &tapeSet[posIn];
-    ptrOut = &tapeSet[posOut];
-
-    //calcula número de grupos de blocos
-    numGroups = numBlocks / TAPE_SET_SIZE;
-
-    if (numBlocks % TAPE_SET_SIZE > 0)
-      numGroups++;
-
-    //verifica se a próxima intercalação será a última
-    if (numGroups == 1)
-      lastMerge = 1;
-    else
-      lastMerge = 0;
-
-    mergeBlocksHeap(ptrIn, ptrOut, idxIn, idxOut, &RAM, numGroups, lastMerge);
-    //mergeBlocks(ptrIn, ptrOut, idxIn, idxOut, &RAM, blockSize, numGroups);
-
-    posIn += posCtrl;
-    posCtrl *= -1;
-    posOut += posCtrl;
-
-    idxIn += idxCtrl;
-    idxCtrl *= -1;
-    idxOut += idxCtrl;
-
-    blockSize *= TAPE_SET_SIZE;
-
-    numBlocks = numGroups;
-  }
-}
-
-int sortedBlocks(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
+int sortedBlocks_withoutRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
 {
   short destTape;
   int i, j, numBlocks;
@@ -131,8 +55,9 @@ int sortedBlocks(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
   return numBlocks;
 }
 
-void mergeBlocks(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
-                 short idxOut, tRAM *RAM, short blockSize, int numGroups)
+void mergeBlocks_withoutRepSub(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
+                               short idxOut, tRAM *RAM, short blockSize,
+                               int numGroups)
 {
   short i, j;
   tStudent aux;
@@ -142,7 +67,7 @@ void mergeBlocks(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
   for (i = 0; i < TAPE_SET_SIZE; i++)
   {
     openTape(&(ptrIn->tape[i]), "r\0");
-    createTape(&(ptrOut->tape[i]), i + idxOut);
+    initializeTape(&(ptrOut->tape[i]), i + idxOut);
   }
 
   j = 0;

@@ -1,6 +1,9 @@
+#ifndef TAPE_H
+#define TAPE_H
+
 #include <stdio.h>
 
-#include "ram.h"
+#include "student.h"
 
 typedef struct
 {
@@ -15,7 +18,8 @@ typedef struct
   tTape *tape;
 } tTapeSet;
 
-void createTape(tTape *, short);
+void createTape(tTape **, short);
+void initializeTape(tTape *, short);
 short insertTape(tTape *, tStudent);
 short readTape(tTape *, tStudent *);
 short openTape(tTape *, char [3]);
@@ -29,3 +33,4 @@ void setNext(tTape *);
 int getNumReads(tTape *);
 void setNumReads(tTape *, int);
 
+#endif

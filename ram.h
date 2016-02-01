@@ -1,4 +1,7 @@
-#include "file.h"
+#ifndef RAM_H
+#define RAM_H
+
+#include "student.h"
 
 typedef struct
 {
@@ -18,3 +21,5 @@ short getPriority(tRAM *, short);
 void setPriority(tRAM *, short, short);
 float getGrade(tRAM *, short);
 void swapStudents(tRAM *, short, short);
+
+#endif

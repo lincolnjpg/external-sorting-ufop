@@ -18,8 +18,12 @@ short loadFromFile(FILE **file, tStudent *student)
 
   test = ftell(*file);
 
+  //test
+  //fseek(*file, 100 * 19, 0);
+
   //file's lines have 100 characters at most (plus new-line)
   test = fscanf(*file, "%d %f ", &(student->id), &(student->grade));
+  //test = fscanf(*file, "%s", strTest);
 
   if (test == 2)
   {
@@ -59,14 +63,43 @@ short loadFromFile(FILE **file, tStudent *student)
     return 1;
 }
 
-void createNewFile(short situation)
+/*
+Função: identifyProperInputFile
+  - Identifica e define arquivo que será utilizado como entrada. O arquivo
+    adequado é escolhido com base no valor do parâmetro de entrada. Uma vez
+    identificado, tal arquivo é copiado para o mesmo diretório, mas com outro
+    nome, "PROVAO.txt", que é o nome de arquivo utilizado durante o processo
+    de leitura dos dados de entrada.
+
+  - Observação: Essa função é dependente de Sistemas Operacionais baseados em
+    Linux, pois faz uso do comando "cp". A função assume que os arquivos
+    "PROVAO-ASC.txt", "PROVAO-DESC.txt" e "PROVAO-RANDOM.txt" existem e estejam
+    localizados no mesmo diretório que o executável do programa e, por isso, não
+    verifica se a cópia foi realizada com sucesso.
+
+Parâmetros:
+  - situation: número inteiro que indica situação do arquivo de entrada
+               (1 - ordenado ascendentemente, 2 - ordenado descendentemente,
+               3 - desordenado aleatoriamente).
+
+Retorno: nenhum
+*/
+
+void identifyProperInputFile(short situation)
 {
-  switch (situation)
+  switch(situation)
   {
     case 1:
-
-      break;
+      /*renomeia arquivo "PROVAO-ASC.txt", que está ordenado ascendentemente, de
+      acordo com as notas, para "PROVAO.txt".*/
+      system("cp ./PROVAO-ASC.txt ./PROVAO.txt");
     case 2:
-      break;
+      /*renomeia arquivo "PROVAO-DESC.txt", que está ordenado descendentemente,
+      de acordo com as notas, para "PROVAO.txt".*/
+      system("cp ./PROVAO-DESC.txt ./PROVAO.txt");
+    case 3:
+      /*renomeia arquivo "PROVAO-RANDOM.txt", que está desordenado
+      aleatoriamente, de acordo com as notas, para "PROVAO.txt".*/
+      system("cp ./PROVAO-RANDOM.txt ./PROVAO.txt");
   }
 }
