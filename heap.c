@@ -1,67 +1,101 @@
 #include "heap.h"
 
-void buildHeap(tRAM *RAM, int size)
+/*
+Função: buildHeap
+  - Responsável por transformar a área de memória na estrutura de dados "heap".
+
+Parâmetros:
+  - RAM: Área de memória disponível para o método de ordenação
+  - size: Tamanho da área de memória
+
+Retorno:
+  - Nenhum
+*/
+
+void buildHeap(tRAM *RAM, int size, long *compCounter)
 {
-  int i, idxMinor, idxParent, idxTarget, idxLChild, idxRChild, swaps;
+  int i, idxLargest, idxParent, idxTarget, idxLChild, idxRChild, swaps;
   tStudent aux;
 
   for (i = 0; i < size / 2;)
   {
-    //left child index
+    /*Índice do filho à esquerda*/
     idxLChild = 2 * i + 1;
-    //right child index
+    /*Índice do filho à direita*/
     idxRChild = 2 * i + 2;
-    swaps = 0;
+    swaps = 0;        
 
     if (idxLChild >= 0 && idxLChild < size &&
         idxRChild >= 0 && idxRChild < size)
     {
-      //children's indexes are inside array
+      /*Índices de ambos os filhos fazem parte do vetor*/
       if (RAM->student[idxLChild].grade < RAM->student[idxRChild].grade)
-        //right child is minor than left child
-        idxMinor = idxRChild;
+        /*Filho à esquerda é menor que filho à direita*/
+        idxLargest = idxRChild;
       else
-        //left child is minor than right child
-        idxMinor = idxLChild;
+        /*Filho à direita é menor que filho à esquerda*/
+        idxLargest = idxLChild;
+
+      (*compCounter)++;
     }
     else
-      //right child index is beyond array's bounds
-      idxMinor = idxLChild;
+      /*Índice do filho à direito está além dos limites do vetor
+      (utiliza índice do filho à esquerda)*/
+      idxLargest = idxLChild;
 
-    if (RAM->student[i].grade < RAM->student[idxMinor].grade)
+    if (RAM->student[i].grade < RAM->student[idxLargest].grade)
     {
-      //"parent-minor child" swap
+      /*Troca pai com seu maior filho*/
       aux = RAM->student[i];
-      RAM->student[i] = RAM->student[idxMinor];
-      RAM->student[idxMinor] = aux;
+      RAM->student[i] = RAM->student[idxLargest];
+      RAM->student[idxLargest] = aux;
 
-      //check for a backward swap (new a[i] is minor than its parent)
+      /*Verifica a necessidade de realizar trocas no sentido oposto
+      (caso a propriedade do "heap" tenha sido violada após a troca)*/
       idxTarget = i;
       idxParent = (idxTarget - 1) / 2;
 
+      (*compCounter)++;
+
       while (RAM->student[idxTarget].grade > RAM->student[idxParent].grade)
       {
-        //parent node is greater
+        /*Pai é menor que filho - continua troca*/
         aux = RAM->student[idxTarget];
         RAM->student[idxTarget] = RAM->student[idxParent];
         RAM->student[idxParent] = aux;
 
-        //target index has changed
+        /*Atualiza índices utilizados nas comparações*/
         idxTarget = idxParent;
         idxParent = (idxTarget - 1) / 2;
 
-        //controls i variable increment
+        /*Controla o incremento da variável de laço "i"*/
         swaps++;
+
+        (*compCounter)++;
       }
     }
 
     if (swaps == 0)
-      //i must not be incremented if a[i] has changed (while statement above)
+      /*Variável "i" não deve ser incrementada caso valor de RAM->student[i]
+      tenha sido alterado. Isso é necessário para que a propriedade do "heap"
+      seja mantida.*/
       i++;
   }
 }
 
-void rebuildHeap(tRAM *RAM, int size)
+/*
+Função: rebuildHeap
+  - Responsável por reconstruir a estrutura de dados "heap".
+
+Parâmetros:
+  - RAM: Área de memória disponível para o método de ordenação
+  - size: Tamanho da área de memória
+
+Retorno:
+  - Nenhum
+*/
+
+void rebuildHeap(tRAM *RAM, int size, long *compCounter)
 {
   int idxNewRoot, idxMinor, idxLChild, idxRChild;
   tStudent aux;
@@ -90,15 +124,21 @@ void rebuildHeap(tRAM *RAM, int size)
       else
         //prioridades iguais (guarda o índice do estudante com a menor nota)
         idxMinor = idxLChild;
+
+      (*compCounter)++;
     }
     else
       //right child index is beyond array's bounds
       idxMinor = idxLChild;
 
+    (*compCounter)++;
+
     //compares with parent (idxNewRoot)
     if (RAM->student[idxMinor].grade < RAM->student[idxNewRoot].grade &&
         RAM->student[idxNewRoot].priority == 0)
       break;
+
+    (*compCounter)++;
 
     if (RAM->student[idxMinor].priority < RAM->student[idxNewRoot].priority ||
         (RAM->student[idxMinor].grade > RAM->student[idxNewRoot].grade &&

@@ -5,7 +5,8 @@
 
 #include "student.h"
 
-short loadFromFile(FILE **, tStudent *);
+short readStudent(FILE **, tStudent *);
+short writeStudent(FILE *, tStudent);
 void identifyProperInputFile(short);
 
 #endif

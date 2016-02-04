@@ -3,7 +3,7 @@
 
 #include "ram.h"
 
-void buildHeap(tRAM *, int);
-void rebuildHeap(tRAM *, int);
+void buildHeap(tRAM *, int, long *);
+void rebuildHeap(tRAM *, int, long *);
 
 #endif

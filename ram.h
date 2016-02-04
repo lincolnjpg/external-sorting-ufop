@@ -16,7 +16,7 @@ short getSize(tRAM *);
 void cleanRAM(tRAM *);
 tStudent getStudent(tRAM *, short);
 void removeStudent(tRAM *, short);
-void sortRAM(tRAM *, short);
+void sortRAM(tRAM *, short, long *);
 short getPriority(tRAM *, short);
 void setPriority(tRAM *, short, short);
 float getGrade(tRAM *, short);

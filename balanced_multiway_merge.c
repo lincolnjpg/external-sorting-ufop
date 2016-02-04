@@ -1,5 +1,3 @@
-//acho que é melhor usar TAPE_SET_SIZE ao invés de RAM_SIZ nas continhas de bloco e grupo abaixo...
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,56 +6,104 @@
 #include "constants.h"
 #include "file.h"
 
-int sortedBlocks_withoutRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
+/*
+Função: sortedBlocks_withoutRepSub
+  - Responsável por gerar os blocos ordenados (sem uso da técnica "substituição
+    por seleção").
+
+Parâmetros:
+  - file: Arquivo de entrada
+  - ptrIn: Fitas de entrada
+  - RAM: Área de memória disponível para o método de ordenação
+  - n: Quantidade de registros considerada durante ordenação
+
+Retorno:
+  - Número de blocos ordenados gerados
+*/
+
+int sortedBlocks_withoutRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n,
+                               long *inCounter, long *outCounter,
+                               long *compCounter)
 {
   short destTape;
   int i, j, numBlocks;
   tStudent student;
 
-  //this variable stores the destination tape id
   i = destTape = numBlocks = 0;
 
-  //generate and insert sorted blocks into input tapes  
-  while (loadFromFile(file, &student) == 0 && i < n)
-  {
-    //tStudent loaded from file
+  (*inCounter)++;
+
+  /*Gera blocos ordenados*/
+  while (readStudent(file, &student) == 0 && i < n)    
+  {        
+    /*Registro foi lido do arquivo de entrada*/
     if (getSize(RAM) < RAM_SIZE)
       insertRAM(RAM, student, getSize(RAM));
     else
     {
-      //sort data
-      sortRAM(RAM, RAM_SIZE);
-      //put each sorted block into an input tape
+      /*Ordena área de memória*/
+      sortRAM(RAM, RAM_SIZE, compCounter);
+      /*Insere bloco ordenado na fita de entrada, indicada por "destTape"*/
       for (j = 0; j < RAM->size; j++)
+      {
         insertTape(&(ptrIn->tape[destTape]), getStudent(RAM, j));
 
-      //now, RAM can stores RAM_SIZE more students
+        (*outCounter)++;
+      }
+
+      /*"Limpa" área de memória*/
       cleanRAM(RAM);
-      //insert latest student into the RAM
+      /*Insere registro lido na área de memória*/
       insertRAM(RAM, student, getSize(RAM));
-      //variable that controls the destination tape
+      /*Variável que controla qual fita de entrada receberá o bloco*/
       destTape++;
+      /*Variável que controla número de blocos ordenados gerados*/
       numBlocks++;
-      //reset destination tape control
+      /*"Reseta" índice da fita de entrada, a fim de evitar acesso em posição
+      inválida*/
       if (destTape == TAPE_SET_SIZE)
         destTape = 0;
     }
 
     i++;
+
+    (*inCounter)++;
   }
 
   if (getSize(RAM) > 0)
     numBlocks++;
 
   for (i = 0; i < getSize(RAM); i++)
+  {
     insertTape(&(ptrIn->tape[destTape]), getStudent(RAM, i));
+
+    (*outCounter)++;
+  }
 
   return numBlocks;
 }
 
+/*
+Função: mergeBlocks_withoutRepSub
+  - Responsável por intercalar os blocos ordenados
+
+Parâmetros:
+  - ptrIn: Fitas de entrada
+  - ptrOut: Fitas de saída
+  - idxIn: Primeiro id das fitas de entrada
+  - idxOut: Primeiro id das fitas de saída
+  - RAM: Área de memória disponível para o método de ordenação
+  - blockSize: Tamanho dos blocos ordenados
+  - numGroups: Número de grupos de blocos ordenados
+
+Retorno:
+  - Nenhum
+*/
+
 void mergeBlocks_withoutRepSub(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
                                short idxOut, tRAM *RAM, short blockSize,
-                               int numGroups)
+                               int numGroups, long *inCounter, long *outCounter,
+                               long *compCounter)
 {
   short i, j;
   tStudent aux;
@@ -77,21 +123,18 @@ void mergeBlocks_withoutRepSub(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
     for (i = 0; i < TAPE_SET_SIZE; i++)
       if (ptrIn->tape[i].status == 1 && getTapeLength(&(ptrIn->tape[i])) > 0)
       {
-        //tape is active
+        (*inCounter)++;
+
+        /*Fita está ativa e possui registro(s)*/
         if (readTape(&(ptrIn->tape[i]), &aux) == 0)
-        {
-          //put student into RAM
+        {                   
+          /*Insere registros na área de memória*/
           insertRAM(RAM, aux, getSize(RAM));
-
-          //talvez não seja necessário fazer isso aqui, já que é feito logo abaixo tb
-
-          //lembrar que a cada linha escrita, um \n tb é escrito. então
-          //a cada linha, o ponteiro é um tStudent + 1... complexo...
 
           if (ptrIn->tape[i].numReads == blockSize ||
               getTapeLength(&(ptrIn->tape[i])) == 0)
           {
-            //tape is now inactive
+            /*Fita é invativada*/
             setStatus(&(ptrIn->tape[i]), 0);
             setNumReads(&(ptrIn->tape[i]), 0);
           }
@@ -102,25 +145,29 @@ void mergeBlocks_withoutRepSub(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
 
     while (getSize(RAM) > 0)
     {
-      //sort RAM, according to its size
-      sortRAM(RAM, RAM_SIZE);
-      //get student from RAM
+      /*Ordena área de memória*/
+      sortRAM(RAM, RAM_SIZE, compCounter);
+      /*Obtém primeiro registro da área de memória*/
       aux = getStudent(RAM, 0);
-      //remove student from RAM
+      /*Remove registro da primeira posição da área de memória*/
       removeStudent(RAM, 0);
-      //insert first student into an output tape
+      /*Insere registro lido da área de memória na fita de saída adequada*/
       insertTape(&(ptrOut->tape[j]), aux);
+
+      (*outCounter)++;
 
       if (ptrIn->tape[aux.origin - idxIn].status == 1)
       {
-        //get the next student from same tape
+        (*inCounter)++;
+
+        /*Lê o próximo registro daquela mesma fita*/
         if (readTape(&(ptrIn->tape[aux.origin - idxIn]), &aux) == 0)
           insertRAM(RAM, aux, 0);
 
         if (ptrIn->tape[aux.origin - idxIn].numReads == blockSize ||
             getTapeLength(&(ptrIn->tape[aux.origin - idxIn])) == 0)
         {
-          //tape is now inactive
+          /*Fita é invativada*/
           setStatus(&(ptrIn->tape[aux.origin - idxIn]), 0);
           setNumReads(&(ptrIn->tape[aux.origin - idxIn]), 0);
         }

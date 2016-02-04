@@ -4,15 +4,19 @@
 
 #include "validation.h"
 
-/*Função - validaargumentos:
-    - verifica se argumentos recebidos, via linha de comando, são válidos
-  Parâmetros:
-    - argc: quantidade de argumentos recebidos
-    - argv: lista de argumentos recebidos
-    - arguments: struct que armazena os argumentos convetidos para o tipo int
-  Retorno:
-    - valor verdadeiro: caso algum argumento seja inválido
-    - valor falso: caso todos os argumentos estejam corretos*/
+/*
+Função: validaargumentos
+    - Verifica se argumentos recebidos, via linha de comando, são válidos.
+
+Parâmetros:
+    - argc: Quantidade de argumentos recebidos
+    - argv: Lista de argumentos recebidos
+    - arguments: Variável que armazena os argumentos convertidos para o tipo int
+
+Retorno:
+    - valor verdadeiro: Caso algum argumento seja inválido
+    - valor falso: caso Todos os argumentos estejam corretos
+*/
 
 int validateArguments(int argc, char ***argv, tArguments *arguments)
 {

@@ -3,7 +3,26 @@
 #include "balanced_multiway_merge_rep_sub.h"
 #include "constants.h"
 
-int sortedBlocks_withRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
+/*
+Função: sortedBlocks_withRepSub
+  - Responsável por gerar os blocos ordenados (com uso da técnica "substituição
+    por seleção").
+
+  - Observação: Essa função faz uso do carctere ";" para separar registros e do
+    caractere "@" para separar blocos.
+
+Parâmetros:
+  - file: Arquivo de entrada
+  - ptrIn: Fitas de entrada
+  - RAM: Área de memória disponível para o método de ordenação
+  - n: Quantidade de registros considerada durante ordenação
+
+Retorno:
+  - Número de blocos ordenados gerados
+*/
+
+int sortedBlocks_withRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n,
+                            long *inCounter, long *outCounter, long *compCounter)
 {
   short destTape, lastTape, readError, flagCount;
   int i, j, k, numBlocks;
@@ -14,67 +33,79 @@ int sortedBlocks_withRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
 
   for (i = 0; i < RAM_SIZE; i++)
   {
-    loadFromFile(file, &student);    
+    readStudent(file, &student);
     insertRAM(RAM, student, getSize(RAM));
     setPriority(RAM, getSize(RAM) - 1, 0);
+
+    (*inCounter)++;
   }
 
-  buildHeap(RAM, RAM_SIZE);
-
-  //talvez seja bom fazer removeStudent() já retornar o estudante removido
-  //talvez com isso seja possível retirar a função getStudent()...
+  buildHeap(RAM, RAM_SIZE, compCounter);
 
   k = 0;
 
   do
   {
-    //obtém o estudante com menor nota
+    /*Obtém o estudante com menor nota*/
     student = getStudent(RAM, 0);
 
     if (i >= n)
     {
-      //troca primeiro com o último
+      /*Troca primeiro registro com o último*/
       swapStudents(RAM, 0, RAM_SIZE - (k + 1));
-      //retira estudante da RAM
+      /*Remove registro da área de memória*/
       removeStudent(RAM, RAM_SIZE - (k + 1));
 
       k++;
     }
     else
-      //remove primeiro estudante da RAM
+      /*Remove primeiro estudante da RAM*/
       removeStudent(RAM, 0);
 
-    //insere menor estudante (primeiro do heap) na fita apropriada
+    /*Insere menor estudante (primeiro do heap) na fita apropriada*/
     insertTape(&(ptrIn->tape[destTape]), student);
-    //armazena última nota escrita na fita
+    /*Armazena última nota escrita na fita*/
     lastGrade = student.grade;
 
+    (*outCounter)++;
+
     if (i < n)
-      //lê próximo item de dado
-      readError = loadFromFile(file, &student);
+    {
+      /*Lê próximo item de dado*/
+      readError = readStudent(file, &student);
+
+      (*inCounter)++;
+    }
 
     if (readError == 0 || i >= n)
     {      
       if (i < n)
       {
-        //insere item lido na RAM
+        /*Insere item lido na RAM*/
         insertRAM(RAM, student, 0);
 
-        //define a prioridade do estudante recém adicionado à RAM
+        /*Define a prioridade do estudante recém adicionado à RAM*/
         if (getGrade(RAM, 0) > lastGrade)
         {
+          /*Registro lido é maior que o último registro escrito na fita. Tal
+          registro deve ser "marcado".*/
           setPriority(RAM, 0, 1);
 
+          /*Variável que conta quantidade de registros "marcados"*/
           flagCount++;
         }
         else
+          /*Registro lido é menor que último registro escrita na fita.*/
           setPriority(RAM, 0, 0);
 
         if (flagCount == RAM_SIZE)
         {
-          //insere separador de bloco
+          /*Insere separador de bloco*/
           fprintf(ptrIn->tape[destTape].file, "%c\n", '@');
 
+          /*Quando todos os registros estão "marcados", todos são "desmarcados"
+          e um novo bloco é iniciado. Tal bloco deverá ser armazenado numa nova
+          fita.*/
           flagCount = 0;
           destTape++;
           numBlocks++;
@@ -86,28 +117,28 @@ int sortedBlocks_withRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
             setPriority(RAM, j, 0);
         }
         else
-          //insere separador de linha
+          /*Insere separador de linha*/
           fprintf(ptrIn->tape[destTape].file, "%c\n", ';');
 
-        //reconstrói heap, considerando o tamanho máximo da RAM
-        rebuildHeap(RAM, RAM_SIZE);
+        /*Reconstrói heap, considerando o tamanho máximo da RAM*/
+        rebuildHeap(RAM, RAM_SIZE, compCounter);
       }
       else
       {
-        //reconstrói heap, considerando o tamanho atual da RAM
-        rebuildHeap(RAM, getSize(RAM));
+        /*Reconstrói heap, considerando o tamanho atual da RAM*/
+        rebuildHeap(RAM, getSize(RAM), compCounter);
 
-        //verifica a prioridade do novo menor elemento
+        /*Verifica a prioridade do novo menor elemento*/
         if (getStudent(RAM, 0).priority == 1)
         {
           if (destTape != lastTape)
-            //se já mudou de fita, usa ';' como separador
+            /*Se já mudou de fita, usa ';' como separador*/
             fprintf(ptrIn->tape[destTape].file, "%c\n", ';');
           else
-            //se ainda não mudou de fita, usa '@' como separador
+            /*Se ainda não mudou de fita, usa '@' como separador*/
             fprintf(ptrIn->tape[destTape].file, "%c\n", '@');
 
-          //só deve mudar de fita uma vez nesse ponto
+          /*Só deve mudar de fita uma vez nesse ponto*/
           destTape = lastTape + 1;
 
           if (destTape == TAPE_SET_SIZE)
@@ -119,20 +150,22 @@ int sortedBlocks_withRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
 
       i++;
 
-      //armazena o id da fita em uso quando a leitura do arquivo terminou
+      /*Armazena o id da fita em uso quando a leitura do arquivo terminou*/
       if (i == n)
         lastTape = destTape;
     }
-  } while (/*i < n &&*/ readError == 0 && getSize(RAM) > 0);
+  } while (readError == 0 && getSize(RAM) > 0);
 
+  /*Retrocede ponteiro de arquivo para substituir o caracter separador
+  (Como este ponto indica o fim de um bloco, o caractere usado deve ser o "@")*/
   fseek(ptrIn->tape[destTape].file, -2, 1);
   fprintf(ptrIn->tape[destTape].file, "%c\n", '@');
 
-  /*contabiliza bloco formado por itens com prioridade igual a 0 que ainda
+  /*Contabiliza bloco formado por itens com prioridade igual a 0 que ainda
   estavam na RAM após a leitura do último item de dado*/
   numBlocks++;
 
-  /*se, após a leitura do último item de dado, ainda existir, na RAM, algum item
+  /*Se, após a leitura do último item de dado, ainda existir, na RAM, algum item
   com prioridade igual a 1, tal item será enviado para um novo bloco*/
   if (destTape != lastTape)
     numBlocks++;
@@ -143,12 +176,30 @@ int sortedBlocks_withRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n)
     return -1;
 }
 
+/*
+Função: mergeBlocks_withRepSub
+  - Responsável por intercalar os blocos ordenados
+
+Parâmetros:
+  - ptrIn: Fitas de entrada
+  - ptrOut: Fitas de saída
+  - idxIn: Primeiro id das fitas de entrada
+  - idxOut: Primeiro id das fitas de saída
+  - RAM: Área de memória disponível para o método de ordenação
+  - numGroups: Número de grupos de blocos ordenados
+  - lastMerge: Indica se o processo de intercalação corrente será o último
+
+Retorno:
+  - Nenhum
+*/
+
 void mergeBlocks_withRepSub(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
                             short idxOut, tRAM *RAM, int numGroups,
-                            short lastMerge)
+                            short lastMerge, long *inCounter, long *outCounter,
+                            long *compCounter)
 {
-  char separator, enter1, enter2;
-  short i, j, retorno;
+  char separator, enter;
+  short i, j;
   tStudent aux;
 
   cleanRAM(RAM);
@@ -166,24 +217,21 @@ void mergeBlocks_withRepSub(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
     for (i = 0; i < TAPE_SET_SIZE; i++)
       if (ptrIn->tape[i].status == 1 && getTapeLength(&(ptrIn->tape[i])) > 0)
       {
-        //tape is active
+        (*inCounter)++;
+
+        /*Fita está ativa e possui registros*/
         if (readTape(&(ptrIn->tape[i]), &aux) == 0)
-        {
-          //put student into RAM
+        {          
+          /*Insere registro na área de memória disponível para o método*/
           insertRAM(RAM, aux, getSize(RAM));
 
-          //lê separador
-          retorno = fscanf(ptrIn->tape[i].file, "%[\n] %c %[\n]",
-                           &enter1, &separator, &enter2);
-
-          //talvez não seja necessário fazer isso aqui, já que é feito logo abaixo tb
-
-          //lembrar que a cada linha escrita, um \n tb é escrito. então
-          //a cada linha, o ponteiro é um tStudent + 1... complexo...
+          /*Lê caractere separador*/
+          fscanf(ptrIn->tape[i].file, "%c %[\n]", &separator, &enter);
 
           if (separator == '@' || getTapeLength(&(ptrIn->tape[i])) == 0)
           {
-            //tape is now inactive
+            /*Caso o caractere identificado como separados seja um '@' ou a fita
+            não possua mais registros, ela é inativada*/
             setStatus(&(ptrIn->tape[i]), 0);
             setNumReads(&(ptrIn->tape[i]), 0);
           }
@@ -194,35 +242,40 @@ void mergeBlocks_withRepSub(tTapeSet *ptrIn, tTapeSet *ptrOut, short idxIn,
 
     while (getSize(RAM) > 0)
     {
-      //sort RAM, according to its size
-      sortRAM(RAM, RAM_SIZE);
-      //get student from RAM
+      /*Ordena área de memória*/
+      sortRAM(RAM, RAM_SIZE, compCounter);
+      /*Obtém registro localizado na primeira posição da área de memória*/
       aux = getStudent(RAM, 0);
-      //remove student from RAM
+      /*Remove registro localizado na primeira posição da área de memória*/
       removeStudent(RAM, 0);
-      //insert first student into an output tape
-      insertTape(&(ptrOut->tape[j]), aux);
+      /*Insere, na fita, registro removido da área de memória*/
+      insertTape(&(ptrOut->tape[j]), aux);     
+
+      (*outCounter)++;
 
       if (lastMerge == 0)
-        //insere separador
+        /*Insere caractere separador*/
         fprintf(ptrOut->tape[j].file, "%c\n", ';');
 
       if (ptrIn->tape[aux.origin - idxIn].status == 1)
       {
-        //get the next student from same tape
+        (*inCounter)++;
+
+        /*Lê registro localizado na mesma fita que aquele que foi retirado da
+        área de memória*/
         if (readTape(&(ptrIn->tape[aux.origin - idxIn]), &aux) == 0)
-        {
+        {          
           insertRAM(RAM, aux, 0);
-          //lê separador
-          retorno = fscanf(ptrIn->tape[aux.origin - idxIn].file,
-                           "%[\n] %c %[\n]",
-                           &enter1, &separator, &enter2);
+          /*Lê separador*/
+          fscanf(ptrIn->tape[aux.origin - idxIn].file, "%c %[\n]", &separator,
+                 &enter);
         }
 
         if (separator == '@' ||
             getTapeLength(&(ptrIn->tape[aux.origin - idxIn])) == 0)
         {
-          //tape is now inactive
+          /*Caso o caractere identificado como separados seja um '@' ou a fita
+          não possua mais registros, ela é inativada*/
           setStatus(&(ptrIn->tape[aux.origin - idxIn]), 0);
           setNumReads(&(ptrIn->tape[aux.origin - idxIn]), 0);
         }

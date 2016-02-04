@@ -1,5 +1,5 @@
-#ifndef EXTERNALQUICKSORT_H
-#define EXTERNALQUICKSORT_H
+#ifndef QUICKSORT_H
+#define QUICKSORT_H
 
 #include <stdio.h>
 
@@ -11,10 +11,9 @@ typedef struct
   int delimiter, size;
 } tPartition;
 
-void externalQuickSort(int);
-short readStudent(FILE *, tStudent *);
-void insertionSort(tRAM *);
-void sort(int, int, int, int, tRAM *, tPartition *, tPartition *, short);
-void quickSort(int, int, int, int, tRAM *, tPartition *, tPartition *, short);
+short externalQuickSort(int);
+void insertionSort(tRAM *, long *);
+void quickSort(int, int, int, int, tRAM *, tPartition *, tPartition *, short,
+               FILE *, FILE *, FILE *, FILE *, long *, long *, long *);
 
 #endif

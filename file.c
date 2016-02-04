@@ -4,30 +4,43 @@
 
 #include "file.h"
 
-short loadFromFile(FILE **file, tStudent *student)
+/*
+Função: readStudent
+  - Responsável por realizar a leitura de uma linha do arquivo de entrada e
+    preencher a variavel que armazena as informações do estudante, recebida via
+    passagem por referência.
+
+Parâmetros:
+  - file: Arquivo de entrada
+  - student: Variável que representa um estudante
+
+Retorno:
+  - 0, caso a leitura ocorra com sucesso
+  - 1, caso ocorra algum erro na leitura
+*/
+
+short readStudent(FILE **file, tStudent *student)
 {
   char str[86], *newString;
   short stateBeg, cityBeg, cityEnd, courseBeg, courseEnd;
-  int test;
+  int result;
 
+  /*Variáveis que indicam posição de início de cada um dos campos dos registros
+  contidos no arquivo de entrada.*/
   stateBeg = 0;
   cityBeg = 3;
   cityEnd = cityBeg + 49;
   courseBeg = 54;
   courseEnd = courseBeg + 29;
 
-  test = ftell(*file);
+  /*Em sistemas Linux, que representam o caractere "final de linha", pela
+  sequencia de escape '\n', cada linha do arquivo de entrada possui 100
+  caracteres.*/
+  result = fscanf(*file, "%d %f ", &(student->id), &(student->grade));
 
-  //test
-  //fseek(*file, 100 * 19, 0);
-
-  //file's lines have 100 characters at most (plus new-line)
-  test = fscanf(*file, "%d %f ", &(student->id), &(student->grade));
-  //test = fscanf(*file, "%s", strTest);
-
-  if (test == 2)
+  if (result == 2)
   {
-    //pergunto se é igual a dois pq fscanf retorna a quantidade de "variáveis" lidas
+    /*Leitura dos 2 campos iniciais (matrícula e nota) realizada com sucesso*/
     fgets(str, 86, *file);
 
     newString = strtok (str, " ");
@@ -53,7 +66,7 @@ short loadFromFile(FILE **file, tStudent *student)
       newString = strtok (NULL, " ");
     }
 
-    //removes blank space at the end of c-string
+    /*Remove o espaço em branco no final de uma cadeia de caracteres*/
     student->city[strlen(student->city) - 1] = '\0';
     student->course[strlen(student->course) - 1] = '\0';
 
@@ -78,11 +91,12 @@ Função: identifyProperInputFile
     verifica se a cópia foi realizada com sucesso.
 
 Parâmetros:
-  - situation: número inteiro que indica situação do arquivo de entrada
+  - situation: Número inteiro que indica situação do arquivo de entrada
                (1 - ordenado ascendentemente, 2 - ordenado descendentemente,
                3 - desordenado aleatoriamente).
 
-Retorno: nenhum
+Retorno:
+  - Nenhum
 */
 
 void identifyProperInputFile(short situation)
@@ -90,16 +104,35 @@ void identifyProperInputFile(short situation)
   switch(situation)
   {
     case 1:
-      /*renomeia arquivo "PROVAO-ASC.txt", que está ordenado ascendentemente, de
+      /*Renomeia arquivo "PROVAO-ASC.txt", que está ordenado ascendentemente, de
       acordo com as notas, para "PROVAO.txt".*/
       system("cp ./PROVAO-ASC.txt ./PROVAO.txt");
+
+      break;
     case 2:
-      /*renomeia arquivo "PROVAO-DESC.txt", que está ordenado descendentemente,
+      /*Renomeia arquivo "PROVAO-DESC.txt", que está ordenado descendentemente,
       de acordo com as notas, para "PROVAO.txt".*/
       system("cp ./PROVAO-DESC.txt ./PROVAO.txt");
+
+      break;
     case 3:
-      /*renomeia arquivo "PROVAO-RANDOM.txt", que está desordenado
+      /*Renomeia arquivo "PROVAO-RANDOM.txt", que está desordenado
       aleatoriamente, de acordo com as notas, para "PROVAO.txt".*/
       system("cp ./PROVAO-RANDOM.txt ./PROVAO.txt");
+  }
+}
+
+short writeStudent(FILE *file, tStudent student)
+{
+  if (file != NULL)
+  {
+    fprintf(file, "%08d %05.1f %s %-50s %-30s\n", student.id,
+            student.grade, student.state, student.city, student.course);
+
+    return ferror(file);
+  }
+  else
+  {
+    return 1;
   }
 }
