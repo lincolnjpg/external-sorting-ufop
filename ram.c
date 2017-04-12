@@ -236,3 +236,13 @@ void swapStudents(tRAM *RAM, short pos1, short pos2)
   RAM->student[pos1] = RAM->student[pos2];
   RAM->student[pos2] = aux;
 }
+
+/*
+
+*
+*/
+void freeRAM(tRAM *RAM)
+{
+  free(RAM->student);
+  RAM->student = NULL;
+}

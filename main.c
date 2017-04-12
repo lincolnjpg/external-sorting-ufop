@@ -20,14 +20,14 @@ int main(int argc, char *argv[])
   }
   else
   {
-    /*Identifica qual dos arquivos de entrada sera utilizado*/
+    /*Identifica qual dos arquivos de entrada será utilizado*/
     identifyProperInputFile(arguments.situation);
 
     if (arguments.method != 4)
-      /*Chama funcao responsavel pelos metodos de intercalacao*/
+      /*Chama função responsável pelos métodos de intercalação*/
       result = merge(arguments.method, arguments.quantity);
     else
-      /*Chama funcao responsavel pelo metodo quicksort externo*/
+      /*Chama função responsável pelo método quicksort externo*/
       result = externalQuickSort(arguments.quantity);
   }
 

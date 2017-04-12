@@ -32,5 +32,6 @@ void setStatus(tTape *, short);
 void setNext(tTape *);
 int getNumReads(tTape *);
 void setNumReads(tTape *, int);
+void freeTape(tTape **);
 
 #endif

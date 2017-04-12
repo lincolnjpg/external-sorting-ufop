@@ -76,6 +76,8 @@ short externalQuickSort(int N)
     printf("Numero de comparacoe de chave: %ld\n", compCounter);
     printf("Tempo de execucao: %.2lfs\n", tTotal);
 
+    freeRAM(&RAM);
+
     return 0;
   }
   else
@@ -104,12 +106,17 @@ void insertionSort(tRAM *RAM, long *compCounter)
 
   /*Observação: Os registros são ordenados de forma descendente*/
 
+  printf("RAM->start + 1: %d\n", RAM->start + 1);
+  printf("RAM->end: %d\n", RAM->end);
+
   for (i = RAM->start + 1; i < RAM->end; i++)
   {
     aux = RAM->student[i];
     j = i;
 
     (*compCounter)++;
+
+    printf("j - 1: %d\n", j - 1);
 
     while (aux.grade > RAM->student[j - 1].grade && j > 0)
     {

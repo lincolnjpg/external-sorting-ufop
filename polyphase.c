@@ -57,7 +57,7 @@ int sortedBlocksPolyphase(FILE **file, tTapeSet *inputTapes, tRAM *RAM, int n,
     {
       /*Troca primeiro com o último*/
       swapStudents(RAM, 0, POLYPHASE_TAPE_SET_SIZE - 1 - (k + 1));
-      //retira estudante da RAM
+      /*Retira estudante da RAM*/
       removeStudent(RAM, POLYPHASE_TAPE_SET_SIZE - 1 - (k + 1));
 
       k++;
@@ -68,7 +68,7 @@ int sortedBlocksPolyphase(FILE **file, tTapeSet *inputTapes, tRAM *RAM, int n,
 
     /*Insere menor estudante (primeiro do heap) na fita apropriada*/
     insertTape(&(inputTapes->tape[destTape]), student);
-    //armazena última nota escrita na fita
+    /*Armazena última nota escrita na fita*/
     lastGrade = student.grade;
 
     (*outCounter)++;

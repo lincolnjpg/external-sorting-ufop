@@ -155,6 +155,10 @@ int merge(short method, int N)
       gettimeofday(&t2, NULL);
       /*Cálculo do tempo gasto pela operação que intercala os blocos*/
       timeMerge = (t2.tv_sec + t2.tv_usec / 1000000.0) - (t1.tv_sec + t1.tv_usec / 1000000.0);
+
+      freeRAM(&RAM);
+      freeTape(&(tapeSet[posIn].tape));
+      freeTape(&(tapeSet[posOut].tape));
     }
     else
     {
@@ -211,6 +215,9 @@ int merge(short method, int N)
 
       for (i = 0; i < POLYPHASE_TAPE_SET_SIZE; i++)
         closeTape(&(tapeSetPolyphase.tape[i]));
+
+      freeRAM(&RAM);
+      freeTape(&(tapeSetPolyphase.tape));
     }
 
     puts("*** Resultado ***\n");

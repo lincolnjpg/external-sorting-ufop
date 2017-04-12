@@ -21,5 +21,6 @@ short getPriority(tRAM *, short);
 void setPriority(tRAM *, short, short);
 float getGrade(tRAM *, short);
 void swapStudents(tRAM *, short, short);
+void freeRAM(tRAM *);
 
 #endif

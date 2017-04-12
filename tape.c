@@ -278,3 +278,19 @@ void setNumReads(tTape *tape, int reads)
 {
   tape->numReads = reads;
 }
+
+/*
+Função: freeTape
+  - Libera memória alocada para um conjunto (vetor) de fitas
+
+Parâmetros:
+  - tape: Ponteiro para conjunto de fitas
+
+Retorno:
+  - Nenhum.
+*/
+void freeTape(tTape **tape)
+{
+  free(*tape);
+  *tape = NULL;
+}

@@ -73,6 +73,9 @@ int sortedBlocks_withoutRepSub(FILE **file, tTapeSet *ptrIn, tRAM *RAM, int n,
   if (getSize(RAM) > 0)
     numBlocks++;
 
+  /*Ordena elementos da área de memória disponível para o método*/
+  sortRAM(RAM, RAM_SIZE, compCounter);
+
   for (i = 0; i < getSize(RAM); i++)
   {
     insertTape(&(ptrIn->tape[destTape]), getStudent(RAM, i));
